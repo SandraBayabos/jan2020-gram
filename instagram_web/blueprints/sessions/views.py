@@ -8,7 +8,7 @@ sessions_blueprint = Blueprint(
 
 
 @sessions_blueprint.route("/", methods=["GET"])
-def show():
+def new():
     return render_template("sessions/new.html")
 
 
@@ -31,4 +31,11 @@ def sign_in():
 
     login_user(user)
     flash(f"Welcome back {user.username}! You are now logged in")
+    return redirect(url_for("home"))
+
+
+@sessions_blueprint.route("/logout")
+def logout():
+    logout_user()
+    flash("Successfully logged out. Goodbye!")
     return redirect(url_for("home"))
