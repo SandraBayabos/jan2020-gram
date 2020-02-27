@@ -1,6 +1,5 @@
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash
 from models.user import User
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 users_blueprint = Blueprint('users',
@@ -16,10 +15,9 @@ def new():
 @users_blueprint.route('/', methods=['POST'])
 def create():
     user_name = request.form.get("user_name")
-    # breakpoint()
     email = request.form.get("email")
     password = request.form.get("password")
-    hashed_password = generate_password_hash(password)
+    # hashed_password = generate_password_hash(password)
 
     # if not User.validate_password(password):
     #     flash(f"The password you've inserted is invalid!")
@@ -28,7 +26,7 @@ def create():
     new_user = User(
         username=user_name,
         email=email,
-        password=hashed_password
+        password=password
     )
 
     if new_user.save():

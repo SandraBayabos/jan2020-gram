@@ -1,9 +1,11 @@
 from models.base_model import BaseModel
 import peewee as pw
 import re
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 
-class User(BaseModel):
+class User(BaseModel, UserMixin):
     username = pw.CharField(unique=True)
     email = pw.CharField(unique=True)
     password = pw.CharField(null=False)
@@ -24,6 +26,20 @@ class User(BaseModel):
 
         if duplicate_email:
             self.errors.append("An account with that email already exists.")
+        else:
+            self.password = generate_password_hash(self.password)
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.id
 
     # @classmethod
     # def validate_password(self, password):

@@ -1,3 +1,5 @@
+{% from "macros/navbar.html" import navbar %}
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
@@ -23,14 +25,23 @@
     </title>
   </head>
   <body>
-    {% block content %} {% endblock %} {% with messages = get_flashed_messages()
-    %} {% if messages %}
-    <ul class="flashes">
-      {% for message in messages %}
-      <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %} {% endwith %}
+    {{ navbar() }}
+    <div class="container-fluid">
+      {% with messages = get_flashed_messages() %} {% if messages %} {% for
+      message in messages %}
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{messages}}
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %} {% block content %} {% endblock %}
+    </div>
     <footer>
       Made with &hearts; at
       <a
