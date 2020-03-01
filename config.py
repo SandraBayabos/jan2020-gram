@@ -11,8 +11,8 @@ class Config(object):
     S3_BUCKET = os.environ.get("S3_BUCKET")
     S3_KEY = os.environ.get("AWS_ACCESS_KEY")
     S3_SECRET = os.environ.get("AWS_SECRET_KEY")
-    S3_LOCATION = f'http://{S3_BUCKET}.s3.amazonaws.com/',
     AWS_LINK = f'https://s3.amazonaws.com/{S3_BUCKET}'
+    S3_LOCATION = f'http://{S3_BUCKET}.s3.amazonaws.com/'
 
 
 class ProductionConfig(Config):

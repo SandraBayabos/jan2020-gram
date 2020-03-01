@@ -112,8 +112,6 @@ def update(id):
 @users_blueprint.route("/upload", methods=["POST"])
 def upload_profile():
 
-    user = current_user
-
     if "user_profile_picture" not in request.files:
         flash('No user_file key in request.files')
         return redirect('/')
@@ -124,9 +122,13 @@ def upload_profile():
         file.filename = secure_filename(file.filename)
         output = upload_file_to_s3(file, Config.S3_BUCKET)
 
-        user.user_profile_image = file.filename
+        image = f"{Config.S3_LOCATION}{file.filename}"
 
-        if user.save():
+        update_user_image = User.update(
+            user_profile_image=image
+        ).where(User.id == current_user.id)
+
+        if update_user_image.execute():
             flash("Success!")
             return redirect(url_for("users.edit", id=current_user.id))
         else:
