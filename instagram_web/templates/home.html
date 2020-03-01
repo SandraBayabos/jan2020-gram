@@ -1,12 +1,17 @@
 {% extends "_layout.html" %}
 
+
 {% block title %}
-  Homepage
+Homepage
 {% endblock %}
 
 {% block header %}
 {% endblock %}
 
 {% block content %}
+{% if current_user.is_authenticated %}
+
+<h1>Welcome back {{current_user.username}}</h1>
+{% endif %}
   <h1>Homepage</h1>
 {% endblock %}

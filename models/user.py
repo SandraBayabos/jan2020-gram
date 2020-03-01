@@ -1,33 +1,39 @@
 from models.base_model import BaseModel
+from flask import url_for
 import peewee as pw
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from playhouse.hybrid import hybrid_property
+from config import Config
 
 
 class User(BaseModel, UserMixin):
     username = pw.CharField(unique=True)
     email = pw.CharField(unique=True)
     password = pw.CharField(null=False)
+    user_profile_image = pw.CharField(null=True, default=False)
+    public = pw.BooleanField(default=True)
 
     def validate(self):
-        duplicate_user = User.get_or_none(User.username == self.username)
-        duplicate_email = User.get_or_none(User.email == self.email)
+        existing_username = User.get_or_none(User.username == self.username)
+        existing_email = User.get_or_none(User.email == self.email)
 
-        # password length check
-        if len(self.password) < 6:
-            self.errors.append("Password must be at least 6 characters")
-
-        if not re.search(r"\d", self.password):
-            self.errors.append("Password must contain digit")
-
-        if duplicate_user:
+        if existing_username and not existing_username.id:
             self.errors.append("That name is taken.")
 
-        if duplicate_email:
+        if existing_email and not existing_email.id:
             self.errors.append("An account with that email already exists.")
+
+        # password length check
+        if not self.id and len(self.password) < 6:
+            self.errors.append("Password must be at least 6 characters")
+
+        if not self.id and not re.search(r"\d", self.password):
+            self.errors.append("Password must contain digit")
         else:
-            self.password = generate_password_hash(self.password)
+            if not self.id:
+                self.password = generate_password_hash(self.password)
 
     def is_authenticated(self):
         return True
@@ -41,23 +47,35 @@ class User(BaseModel, UserMixin):
     def get_id(self):
         return self.id
 
-    # @classmethod
-    # def validate_password(self, password):
-    #     valid_password = True
-    #     while not valid_password:
-    #         reg = "(?=.*[a-z])"
+    @hybrid_property
+    def profile_image(self):
+        if self.user_profile_image:
+            return f"{Config.AWS_LINK}/{self.user_profile_image}"
+        else:
+            return url_for("static", filename="images/default.jpg")
 
-    #         # compiling regex
-    #         pat = re.compile(reg)
+    @hybrid_property
+    def is_private(self):
+        if not self.public:
+            return False
 
-    #         # searching regex
-    #         mat = re.search(pat, password)
+            # @classmethod
+            # def validate_password(self, password):
+            #     valid_password = True
+            #     while not valid_password:
+            #         reg = "(?=.*[a-z])"
 
-    #         # validating conditions
-    #         if mat:
-    #             valid_password = True
-    #         else:
-    #             self.errors.append("Password invalid!")
-    #             valid_password = False
+            #         # compiling regex
+            #         pat = re.compile(reg)
 
-    #     return valid_password
+            #         # searching regex
+            #         mat = re.search(pat, password)
+
+            #         # validating conditions
+            #         if mat:
+            #             valid_password = True
+            #         else:
+            #             self.errors.append("Password invalid!")
+            #             valid_password = False
+
+            #     return valid_password

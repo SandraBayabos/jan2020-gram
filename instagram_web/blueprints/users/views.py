@@ -1,4 +1,5 @@
-from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash
+from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash, abort
+from flask_login import login_user, login_required, current_user
 from models.user import User
 
 
@@ -31,6 +32,7 @@ def create():
 
     if new_user.save():
         flash(f"Welcome {new_user.username}!")
+        login_user(new_user)
         return redirect(url_for("home"))
     else:
         for error in new_user.errors:
@@ -39,8 +41,19 @@ def create():
 
 
 @users_blueprint.route('/<username>', methods=["GET"])
+@login_required
 def show(username):
-    pass
+    user = User.get_or_none(User.username == username)
+
+    if current_user:
+        if not user:
+            flash(
+                "We can't seem to find a user with that username. Maybe check your spelling.")
+            return redirect(url_for("home"))
+        else:
+            return render_template("users/show.html", user=user)
+    else:
+        return abort(401)
 
 
 @users_blueprint.route('/', methods=["GET"])
@@ -49,10 +62,51 @@ def index():
 
 
 @users_blueprint.route('/<id>/edit', methods=['GET'])
+@login_required
 def edit(id):
-    pass
+    user = User.get_or_none(User.id == id)
+
+    if not str(current_user.id) == id:
+        flash("You are not authorized to perform this action. Please sign in first.")
+        return redirect(url_for("sessions.new"))
+
+    else:
+        if not user:
+            flash("We can't seem to find that user. Try again?")
+            return redirect(url_for("users.edit"))
+
+        return render_template("users/edit.html", user=user)
 
 
 @users_blueprint.route('/<id>', methods=['POST'])
 def update(id):
+    user = User.get_or_none(User.id == id)
+
+    if not str(current_user.id) == id:
+        flash("You are not authorized to perform this action. Please sign in first.")
+        return redirect(url_for("sessions.new"))
+
+    if not user:
+        flash("We can't seem to find that user. Try again?")
+        return redirect(url_for("users.edit"))
+
+    new_user_name = request.form.get("new_user_name")
+    new_email = request.form.get("new_email")
+    # new_password = request.form.get("new_password")
+
+    user.username = new_user_name
+    user.email = new_email
+    # user.password = new_password
+
+    if user.save():
+        flash("Well done! You have just updated your details!")
+        return render_template("users/edit.html", user=user)
+    else:
+        for error in updated_user.errors:
+            flash(error)
+        return redirect(url_for("users.edit", id=id))
+
+
+@users_blueprint.route("/upload", methods=["POST"])
+def upload_profile():
     pass
