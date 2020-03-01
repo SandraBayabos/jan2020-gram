@@ -8,13 +8,13 @@
 <div class="row d-flex">
 
   <div class="col">
-    <form method="post" action="{{url_for('users.upload_profile')}}">
+    <form method="post" action="{{url_for('users.upload_profile')}}" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     
     <label for="user_profile_picture">Change Your Profile Picture</label>
     <br>
     <input type="file" name="user_profile_picture">
-    <button type="submit"></button>
+    <button type="submit">Submit</button>
     </form>
   </div>
 

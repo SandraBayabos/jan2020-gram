@@ -8,9 +8,9 @@ class Config(object):
     SECRET_KEY = os.environ.get(
         'SECRET_KEY') or os.urandom(32)
     # AWS IMPORTS
-    S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
+    S3_BUCKET = os.environ.get("S3_BUCKET")
     S3_KEY = os.environ.get("AWS_ACCESS_KEY")
-    S3_SECRET = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    S3_SECRET = os.environ.get("AWS_SECRET_KEY")
     S3_LOCATION = f'http://{S3_BUCKET}.s3.amazonaws.com/',
     AWS_LINK = f'https://s3.amazonaws.com/{S3_BUCKET}'
 

@@ -13,10 +13,11 @@ s3 = boto3.client(
 
 
 def allowed_file(filename):
-    return "." in filename and \ filename.rsplit(".", 1)[1].lower()in ALLOWED_EXTENSIONS
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower()in ALLOWED_EXTENSIONS
 
 
-def upload_file_to_s3(file):
+def upload_file_to_s3(file, bucket_name):
 
     try:
 
@@ -35,4 +36,4 @@ def upload_file_to_s3(file):
         print("Something Happened: ", e)
         return e
 
-    return f'{S3_LOCATION}{file.filename}'
+    return f'{Config.S3_LOCATION}{file.filename}'

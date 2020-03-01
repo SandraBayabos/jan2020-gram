@@ -1,6 +1,8 @@
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_user, login_required, current_user
 from models.user import User
+from config import Config
+from instagram_web.util.s3_uploader import upload_file_to_s3, allowed_file, secure_filename
 
 
 users_blueprint = Blueprint('users',
@@ -109,4 +111,28 @@ def update(id):
 
 @users_blueprint.route("/upload", methods=["POST"])
 def upload_profile():
-    pass
+
+    user = current_user
+
+    if "user_profile_picture" not in request.files:
+        flash('No user_file key in request.files')
+        return redirect('/')
+
+    file = request.files["user_profile_picture"]
+
+    if file and allowed_file(file.filename):
+        file.filename = secure_filename(file.filename)
+        output = upload_file_to_s3(file, Config.S3_BUCKET)
+
+        user.user_profile_image = file.filename
+
+        if user.save():
+            flash("Success!")
+            return redirect(url_for("users.edit", id=current_user.id))
+        else:
+            for error in user.errors:
+                flash(error)
+                return redirect(url_for("users.edit", id=current_user.id))
+    else:
+        flash("That's not an allowed extension. Please upload only JPGs, JPEGs, GIFs, PNGs and PDFs.")
+        return redirect(url_for("users.edit", id=current_user.id))
