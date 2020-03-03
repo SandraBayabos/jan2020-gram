@@ -1,6 +1,7 @@
 from flask import Flask, Blueprint, render_template, redirect, url_for, request, flash, abort
 from flask_login import login_user, login_required, current_user
 from models.user import User
+from models.image import Image
 from config import Config
 from instagram_web.util.s3_uploader import upload_file_to_s3, allowed_file, secure_filename
 
@@ -60,7 +61,8 @@ def show(username):
 
 @users_blueprint.route('/', methods=["GET"])
 def index():
-    return "USERS"
+    images = Image.select()
+    pass
 
 
 @users_blueprint.route('/<id>/edit', methods=['GET'])
@@ -112,6 +114,8 @@ def update(id):
 @users_blueprint.route("/upload", methods=["POST"])
 def upload_profile():
 
+    user = current_user
+
     if "user_profile_picture" not in request.files:
         flash('No user_file key in request.files')
         return redirect('/')
@@ -122,10 +126,10 @@ def upload_profile():
         file.filename = secure_filename(file.filename)
         output = upload_file_to_s3(file, Config.S3_BUCKET)
 
-        image = f"{Config.S3_LOCATION}{file.filename}"
+        user.user_profile_image = file.filename
 
         update_user_image = User.update(
-            user_profile_image=image
+            user_profile_image=file.filename
         ).where(User.id == current_user.id)
 
         if update_user_image.execute():
