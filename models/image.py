@@ -12,3 +12,11 @@ class Image(BaseModel):
     @hybrid_property
     def user_image(self):
         return f"{Config.AWS_LINK}/{self.image}"
+
+    @hybrid_property
+    def total_donations(self):
+        from models.donation import Donation
+        total = 0
+        for donation in Donation.select().where(Donation.image_id == self.id):
+            total = total + donation.amount
+        return round(total)

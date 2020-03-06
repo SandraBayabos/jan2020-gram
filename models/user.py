@@ -4,7 +4,7 @@ import peewee as pw
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from playhouse.hybrid import hybrid_property
+from playhouse.hybrid import hybrid_property, hybrid_method
 from config import Config
 
 
@@ -59,23 +59,43 @@ class User(BaseModel, UserMixin):
         if not self.public:
             return False
 
-            # @classmethod
-            # def validate_password(self, password):
-            #     valid_password = True
-            #     while not valid_password:
-            #         reg = "(?=.*[a-z])"
+    @hybrid_property
+    def followers(self):
+        from models.follower_following import FollowerFollowing
+        return [user.idol for user in FollowerFollowing.select().where(FollowerFollowing.fan_id == self.id)]
 
-            #         # compiling regex
-            #         pat = re.compile(reg)
+    @hybrid_property
+    def following(self):
+        from models.follower_following import FollowerFollowing
+        return [user.fan for user in FollowerFollowing.select().where(FollowerFollowing.idol_id == self.id)]
 
-            #         # searching regex
-            #         mat = re.search(pat, password)
+    @hybrid_method
+    def is_following(self, user):
+        from models.follower_following import FollowerFollowing
+        return True if FollowerFollowing.get_or_none((FollowerFollowing.idol_id == user.id) & (FollowerFollowing.fan_id == self.id)) else False
 
-            #         # validating conditions
-            #         if mat:
-            #             valid_password = True
-            #         else:
-            #             self.errors.append("Password invalid!")
-            #             valid_password = False
+    @hybrid_method
+    def is_followed_by(self, user):
+        from models.follower_following import FollowerFollowing
+        return True if FollowerFollowing.get_or_none((FollowerFollowing.fan_id == user.id) & (FollowerFollowing.idol_id == self.id)) else False
 
-            #     return valid_password
+        # @classmethod
+        # def validate_password(self, password):
+        #     valid_password = True
+        #     while not valid_password:
+        #         reg = "(?=.*[a-z])"
+
+        #         # compiling regex
+        #         pat = re.compile(reg)
+
+        #         # searching regex
+        #         mat = re.search(pat, password)
+
+        #         # validating conditions
+        #         if mat:
+        #             valid_password = True
+        #         else:
+        #             self.errors.append("Password invalid!")
+        #             valid_password = False
+
+        #     return valid_password
