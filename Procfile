@@ -1,0 +1,1 @@
+web: python migrate.py; gunicorn start:start --preload
