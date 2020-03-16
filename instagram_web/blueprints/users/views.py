@@ -46,6 +46,7 @@ def create():
 @users_blueprint.route('/<username>', methods=["GET"])
 @login_required
 def show(username):
+    breakpoint()
     user = User.get_or_none(User.username == username)
 
     if current_user:

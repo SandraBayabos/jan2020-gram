@@ -36,10 +36,9 @@
     {% endif %}
 
     <div class="col">
-      <!-- {% for u in user.followers%} -->
+      {% for u in user.followers%}
       <h2>
-        <!-- {{u.username}} -->
-        Followers: {{user.fans | length}}
+        {{u.username}} Followers: {{user.fans | length}}
       </h2>
       <!-- {% endfor %} -->
     </div>
