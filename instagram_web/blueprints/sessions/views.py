@@ -3,6 +3,7 @@ from models.user import User
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from instagram_web.util.google_oauth import oauth
+from instagram_web.util.mailgun import send_message
 
 sessions_blueprint = Blueprint(
     "sessions", __name__, template_folder="templates")
@@ -31,6 +32,7 @@ def sign_in():
         return render_template("sessions/new.html")
 
     login_user(user)
+    send_message("hello", "test", current_user.username)
     flash(f"Welcome back {user.username}! You are now logged in")
     return redirect(url_for("home"))
 
