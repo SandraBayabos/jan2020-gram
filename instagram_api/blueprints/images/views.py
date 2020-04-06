@@ -5,10 +5,10 @@ from instagram_web.util.s3_uploader import upload_file_to_s3, allowed_file, secu
 from config import Config
 
 images_api_blueprint = Blueprint(
-    "images", __name__, template_folder="templates")
+    "images_api", __name__, template_folder="templates")
 
 
-@images_api_blueprint("/upload", methods=["POST"])
+@images_api_blueprint.route("/upload", methods=["POST"])
 def create():
     auth_header = request.headers.get("Authorization")
 

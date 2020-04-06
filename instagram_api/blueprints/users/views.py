@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, make_response
 from flask_jwt import JWT, jwt_required
 from models.user import User
 from playhouse.shortcuts import model_to_dict
@@ -20,6 +20,40 @@ def index():
         user_data.append(user)
 
     return jsonify(user_data), 200
+
+
+@users_api_blueprint.route("/new", methods=["POST"])
+def new():
+    post_data = request.get_json()
+
+    try:
+        new_user = User(
+            username=post_data['username'],
+            email=post_data['email'].lower(),
+            password=post_data['password']
+        )
+    except:
+        responseObject = {
+            'status': 'failed',
+            'message': ['All fields are required!']
+        }
+
+        return make_response(jsonify(responseObject)), 400
+
+    if new_user.save():
+        auth_token = new_user.encode_auth_token(new_user.id)
+
+        responseObject = {
+            "status": "success!",
+            "message": "successfully created a new user and signed in!",
+            'auth_token': auth_token.decode(),
+            "user": {
+                "id": int(new_user.id),
+                "username": new_user.username
+            }
+        }
+
+        return make_response(jsonify(responseObject)), 201
 
 
 # @users_api_blueprint("/<username>", methods=["POST"])
